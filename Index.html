@@ -94,13 +94,14 @@
   </div>
 
   <script>
+    const hostname = location.hostname;
     const playerContainer = document.getElementById('playerContainer');
     const chatContainer = document.getElementById('chatContainer');
 
-    const twitchPlayer = `<iframe src="https://player.twitch.tv/?channel=demuxa&parent=localhost" allowfullscreen></iframe>`;
+    const twitchPlayer = `<iframe src="https://player.twitch.tv/?channel=demuxa&parent=${hostname}" allowfullscreen></iframe>`;
     const locoPlayer = `<iframe src="https://loco.com/streamers/demuxa"></iframe>`;
 
-    const twitchChat = `<iframe src="https://www.twitch.tv/embed/demuxa/chat?parent=localhost"></iframe>`;
+    const twitchChat = `<iframe src="https://www.twitch.tv/embed/demuxa/chat?parent=${hostname}"></iframe>`;
     const locoChat = `<iframe src="https://loco.com/streamers/demuxa"></iframe>`;
 
     function setPlayer(platform) {
@@ -158,7 +159,7 @@
     // Inicializa com Twitch
     setPlayer('twitch');
     setChat('twitch');
-    resetHideTimer(); // inicia o timer ao carregar
+    resetHideTimer();
   </script>
 
 </body>
