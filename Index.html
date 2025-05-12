@@ -70,6 +70,18 @@
     button:hover {
       background-color: #772ce8;
     }
+
+    .loco-placeholder {
+      text-align: center;
+      padding: 20px;
+      font-size: 14px;
+      color: #ccc;
+    }
+
+    .loco-placeholder a {
+      color: #9147ff;
+      text-decoration: underline;
+    }
   </style>
 </head>
 <body>
@@ -79,7 +91,7 @@
     <div class="player" id="playerContainer">
       <div class="floating-controls" id="playerButtons">
         <button onclick="setPlayer('twitch')">Player: Twitch</button>
-        <button onclick="setPlayer('loco')">Player: Loco</button>
+        <button id="btnLocoPlayer" onclick="setPlayer('loco')">Player: Loco</button>
         <button onclick="setBothPlayers()">Dois Players</button>
       </div>
     </div>
@@ -88,21 +100,31 @@
     <div class="chat" id="chatContainer">
       <div class="floating-controls" id="chatButtons">
         <button onclick="setChat('twitch')">Chat: Twitch</button>
-        <button onclick="setChat('loco')">Chat: Loco</button>
+        <button id="btnLocoChat" onclick="setChat('loco')">Chat: Loco</button>
       </div>
     </div>
   </div>
 
   <script>
-    const hostname = location.hostname;
+    const hostname = location.hostname === "localhost" ? "localhost" : "iagohale.github.io";
+    const locoBlocked = true; // Loco não suporta embed externo
+
     const playerContainer = document.getElementById('playerContainer');
     const chatContainer = document.getElementById('chatContainer');
 
     const twitchPlayer = `<iframe src="https://player.twitch.tv/?channel=demuxa&parent=${hostname}" allowfullscreen></iframe>`;
-    const locoPlayer = `<iframe src="https://loco.com/streamers/demuxa"></iframe>`;
+    const locoPlayer = `
+      <div class="loco-placeholder">
+        Loco não permite embed externo.<br>
+        <a href="https://loco.com/streamers/demuxa" target="_blank">Abrir a stream da Loco</a>
+      </div>`;
 
     const twitchChat = `<iframe src="https://www.twitch.tv/embed/demuxa/chat?parent=${hostname}"></iframe>`;
-    const locoChat = `<iframe src="https://loco.com/streamers/demuxa"></iframe>`;
+    const locoChat = `
+      <div class="loco-placeholder">
+        Chat da Loco não pode ser embutido.<br>
+        <a href="https://loco.com/streamers/demuxa" target="_blank">Abrir Loco</a>
+      </div>`;
 
     function setPlayer(platform) {
       const html = platform === 'twitch' ? twitchPlayer : locoPlayer;
@@ -117,13 +139,24 @@
     }
 
     function setBothPlayers() {
-      playerContainer.innerHTML = `
-        <div style="display: flex; flex-direction: column; height: 100%;">
-          <div style="flex: 1;">${twitchPlayer}</div>
-          <div style="flex: 1;">${locoPlayer}</div>
-        </div>
-        ${document.getElementById('playerButtons').outerHTML}
-      `;
+      if (locoBlocked) {
+        // Twitch embed + Loco com link
+        playerContainer.innerHTML = `
+          <div style="display: flex; flex-direction: column; height: 100%;">
+            <div style="flex: 1;">${twitchPlayer}</div>
+            <div style="flex: 1;">${locoPlayer}</div>
+          </div>
+          ${document.getElementById('playerButtons').outerHTML}
+        `;
+      } else {
+        playerContainer.innerHTML = `
+          <div style="display: flex; flex-direction: column; height: 100%;">
+            <div style="flex: 1;">${twitchPlayer}</div>
+            <div style="flex: 1;">${locoPlayer}</div>
+          </div>
+          ${document.getElementById('playerButtons').outerHTML}
+        `;
+      }
       rebindButtons();
     }
 
@@ -136,6 +169,12 @@
         if (text.includes('Twitch') && text.includes('Chat')) btn.onclick = () => setChat('twitch');
         if (text.includes('Loco') && text.includes('Chat')) btn.onclick = () => setChat('loco');
       });
+    }
+
+    // Esconde botões da Loco se bloqueado
+    if (locoBlocked) {
+      document.getElementById("btnLocoPlayer").style.display = "none";
+      document.getElementById("btnLocoChat").style.display = "none";
     }
 
     // Mouse activity monitor
