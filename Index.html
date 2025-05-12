@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Player Demuxa - Twitch e Loco</title>
+  <style>
+    body {
+      margin: 0;
+      background-color: #0e0e10;
+      color: white;
+      font-family: sans-serif;
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+    }
+
+    .main {
+      display: flex;
+      width: 100%;
+      height: 100%;
+    }
+
+    .player {
+      position: relative;
+      flex: 0 0 80%;
+      height: 100%;
+    }
+
+    .chat {
+      position: relative;
+      flex: 0 0 20%;
+      height: 100%;
+    }
+
+    iframe {
+      border: none;
+      width: 100%;
+      height: 100%;
+    }
+
+    .floating-controls {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 8px;
+      z-index: 10;
+      transition: opacity 0.3s ease;
+    }
+
+    .hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    button {
+      padding: 6px 12px;
+      background-color: #9147ff;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    button:hover {
+      background-color: #772ce8;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="main">
+    <!-- Player area -->
+    <div class="player" id="playerContainer">
+      <div class="floating-controls" id="playerButtons">
+        <button onclick="setPlayer('twitch')">Player: Twitch</button>
+        <button onclick="setPlayer('loco')">Player: Loco</button>
+        <button onclick="setBothPlayers()">Dois Players</button>
+      </div>
+    </div>
+
+    <!-- Chat area -->
+    <div class="chat" id="chatContainer">
+      <div class="floating-controls" id="chatButtons">
+        <button onclick="setChat('twitch')">Chat: Twitch</button>
+        <button onclick="setChat('loco')">Chat: Loco</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const playerContainer = document.getElementById('playerContainer');
+    const chatContainer = document.getElementById('chatContainer');
+
+    const twitchPlayer = `<iframe src="https://player.twitch.tv/?channel=demuxa&parent=localhost" allowfullscreen></iframe>`;
+    const locoPlayer = `<iframe src="https://loco.com/streamers/demuxa"></iframe>`;
+
+    const twitchChat = `<iframe src="https://www.twitch.tv/embed/demuxa/chat?parent=localhost"></iframe>`;
+    const locoChat = `<iframe src="https://loco.com/streamers/demuxa"></iframe>`;
+
+    function setPlayer(platform) {
+      const html = platform === 'twitch' ? twitchPlayer : locoPlayer;
+      playerContainer.innerHTML = html + document.getElementById('playerButtons').outerHTML;
+      rebindButtons();
+    }
+
+    function setChat(platform) {
+      const html = platform === 'twitch' ? twitchChat : locoChat;
+      chatContainer.innerHTML = html + document.getElementById('chatButtons').outerHTML;
+      rebindButtons();
+    }
+
+    function setBothPlayers() {
+      playerContainer.innerHTML = `
+        <div style="display: flex; flex-direction: column; height: 100%;">
+          <div style="flex: 1;">${twitchPlayer}</div>
+          <div style="flex: 1;">${locoPlayer}</div>
+        </div>
+        ${document.getElementById('playerButtons').outerHTML}
+      `;
+      rebindButtons();
+    }
+
+    function rebindButtons() {
+      document.querySelectorAll('button').forEach(btn => {
+        const text = btn.textContent;
+        if (text.includes('Twitch') && text.includes('Player')) btn.onclick = () => setPlayer('twitch');
+        if (text.includes('Loco') && text.includes('Player')) btn.onclick = () => setPlayer('loco');
+        if (text.includes('Dois')) btn.onclick = setBothPlayers;
+        if (text.includes('Twitch') && text.includes('Chat')) btn.onclick = () => setChat('twitch');
+        if (text.includes('Loco') && text.includes('Chat')) btn.onclick = () => setChat('loco');
+      });
+    }
+
+    // Mouse activity monitor
+    let hideTimeout;
+    function resetHideTimer() {
+      clearTimeout(hideTimeout);
+      showButtons();
+      hideTimeout = setTimeout(hideButtons, 10000); // 10 segundos
+    }
+
+    function showButtons() {
+      document.querySelectorAll('.floating-controls').forEach(el => el.classList.remove('hidden'));
+    }
+
+    function hideButtons() {
+      document.querySelectorAll('.floating-controls').forEach(el => el.classList.add('hidden'));
+    }
+
+    document.addEventListener('mousemove', resetHideTimer);
+
+    // Inicializa com Twitch
+    setPlayer('twitch');
+    setChat('twitch');
+    resetHideTimer(); // inicia o timer ao carregar
+  </script>
+
+</body>
+</html>
